@@ -1,22 +1,5 @@
 # Fabric notebook source
 
-# METADATA ********************
-
-# META {
-# META   "kernel_info": {
-# META     "name": "synapse_pyspark"
-# META   },
-# META   "dependencies": {
-# META     "lakehouse": {
-# META       "default_lakehouse": "a40bc079-4900-4630-97c0-902c8c1e2328",
-# META       "default_lakehouse_name": "Weather_lakehouse",
-# META       "default_lakehouse_workspace_id": "346e1b64-7681-4e36-aaf6-454ec69177f7"
-# META     }
-# META   }
-# META }
-
-# CELL ********************
-
 #Flatten array of structs and structs
 def flatten(df):
    # compute Complex Fields (Lists and Structs) in Schema   
@@ -44,27 +27,9 @@ def flatten(df):
                              if type(field.dataType) == ArrayType or  type(field.dataType) == StructType])
    return df
 
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 def convert_to_iso(timestamp):
     return datetime.datetime.fromtimestamp(timestamp).isoformat()
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 # Load and clean JSON data - all data
 def load_and_clean_data(data_path):
@@ -92,14 +57,6 @@ def load_and_clean_data(data_path):
                         
     return all_data
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 # Load and clean JSON data - newest folder
 def load_and_clean_newest_data(data_path):
@@ -127,15 +84,6 @@ def load_and_clean_newest_data(data_path):
                         
     return all_data
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 def find_latest_date_folder(directory_path):
     #List all folders in the directory
     folders = [f for f in os.listdir(directory_path) if os.path.isdir(os.path.join(directory_path, f))]
@@ -148,43 +96,15 @@ def find_latest_date_folder(directory_path):
     
     return latest_date_folder
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 # Function to convert to UNIX timestamp
 def to_unix_timestamp(dt):
     return int(time.mktime(dt.timetuple()))
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 # Function to fetch weather data
 def fetch_weather_data(lat, lon, start, end):
     url = f"https://history.openweathermap.org/data/2.5/history/city?lat={lat}&lon={lon}&type=hour&start={start}&end={end}&appid={API_KEY}&units=metric"
     response = requests.get(url)
     return response
-
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 # Normalize historical data
 def normalize_historical_data(df):
@@ -216,16 +136,6 @@ def normalize_historical_data(df):
     
     return flattened_df
 
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 # Convert kelvin to celsius
 def kelvin_to_celsius(kelvin):
     
@@ -234,13 +144,3 @@ def kelvin_to_celsius(kelvin):
     
     return df
     
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# MARKDOWN ********************
-
