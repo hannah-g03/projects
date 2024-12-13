@@ -1,22 +1,5 @@
 # Fabric notebook source
 
-# METADATA ********************
-
-# META {
-# META   "kernel_info": {
-# META     "name": "synapse_pyspark"
-# META   },
-# META   "dependencies": {
-# META     "lakehouse": {
-# META       "default_lakehouse": "a40bc079-4900-4630-97c0-902c8c1e2328",
-# META       "default_lakehouse_name": "Weather_lakehouse",
-# META       "default_lakehouse_workspace_id": "346e1b64-7681-4e36-aaf6-454ec69177f7"
-# META     }
-# META   }
-# META }
-
-# CELL ********************
-
 import os
 import json
 from pyspark.sql import SparkSession
@@ -25,37 +8,10 @@ from pyspark.sql.functions import col, explode_outer, when, lit
 from pyspark.sql.types import *
 from delta import *
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 %run Bronze | Functions
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 # Path for data 
 data_path = "/lakehouse/default/Files/weather_data"
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 # Load the data - newest folder
 data = load_and_clean_newest_data(data_path)
@@ -65,16 +21,6 @@ df = spark.read.json(spark.sparkContext.parallelize(data))
 
 # Flatten the DataFrame
 flattened_df = flatten(df)
-
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 # Enforce datatypes
 flattened_df = flattened_df.withColumn("coord_lon", col("coord_lon").cast(FloatType())) \
@@ -97,15 +43,6 @@ flattened_df = flattened_df.withColumn("coord_lon", col("coord_lon").cast(FloatT
        .withColumn("id", col("id").cast(IntegerType())) \
        .withColumn("rain_1h", col("rain_1h").cast(DoubleType())) \
        .withColumn("cod", col("cod").cast(IntegerType()))
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 # Add ID column
 flattened_df_with_id = flattened_df.withColumn("city_id",
@@ -133,23 +70,10 @@ flattened_df_with_id = flattened_df.withColumn("city_id",
 )
 
 
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# MARKDOWN ********************
-
 # **Creating tables:**
-
-# MARKDOWN ********************
 
 # - saving as 'overwrite' as the cities will stay the same every refresh
 
-# CELL ********************
 
 # Create dim table - dim_city
 # Drop duplicates based on city_id to get unique city records
@@ -159,15 +83,6 @@ dim_city = df_unique_city.select('city_id', 'city', 'coord_lat', 'coord_lon')
 
 # Save as a Delta table
 dim_city.write.format("delta").mode("overwrite").saveAsTable("dim_city")
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 # Create dim - dim_weather
 # Create unique df based on weather_id (drop duplicates)
@@ -185,16 +100,6 @@ delta_table.alias("tgt").merge(
 ).whenNotMatchedInsertAll().execute()
 
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
-
 # Create fact table - fact_temp
 fact_temp = flattened_df_with_id.select('city_id', 'weather_id', 'dt', 'main_temp', 'main_feels_like', 'main_temp_max', 'main_temp_min')
 
@@ -208,15 +113,6 @@ delta_table_fact.alias("tgt").merge(
     "tgt.city_id = src.city_id AND tgt.dt = src.dt"
 ).whenNotMatchedInsertAll().execute()
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 # Create fact table - fact_wind
 fact_wind = flattened_df_with_id.select('city_id', 'weather_id', 'dt', 'wind_speed', 'wind_deg', 'wind_gust')
 
@@ -229,34 +125,8 @@ delta_table_wind.alias("tgt").merge(
     "tgt.city_id = src.city_id AND tgt.dt = src.dt"
 ).whenNotMatchedInsertAll().execute()
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 # Save as deltaTable
 flattened_df_with_id.write.format("delta").option("mergeSchema", "true") \
     .mode("append").saveAsTable("current_weather_data")
 
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 flattened_df_with_id.printSchema()
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
