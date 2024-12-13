@@ -1,22 +1,5 @@
 # Fabric notebook source
 
-# METADATA ********************
-
-# META {
-# META   "kernel_info": {
-# META     "name": "synapse_pyspark"
-# META   },
-# META   "dependencies": {
-# META     "lakehouse": {
-# META       "default_lakehouse": "a40bc079-4900-4630-97c0-902c8c1e2328",
-# META       "default_lakehouse_name": "Weather_lakehouse",
-# META       "default_lakehouse_workspace_id": "346e1b64-7681-4e36-aaf6-454ec69177f7"
-# META     }
-# META   }
-# META }
-
-# CELL ********************
-
 # Data science & ML
 import pandas as pd
 import numpy as np
@@ -52,42 +35,14 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, explode_outer, when, lit
 from pyspark.sql.types import *
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# MARKDOWN ********************
-
-# #### visualisations and machine learning model on weather dataset : fact_temp
-
-# CELL ********************
+##### visualisations and machine learning model on weather dataset : fact_temp
 
 # Load dataset
 temp_df = spark.table("fact_temp").toPandas()
 temp_df.set_index('dt', inplace=True)
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 temp_df.info()
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 # Plot main_temp
 
@@ -95,36 +50,18 @@ sns.set_style('whitegrid')
 sns.lineplot(x='dt', y='main_temp', data=temp_df).set(title='main temp - whole dataset')
 
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 # Removing multiple inputs a day 
 df_daily = temp_df.resample('D').mean()
 
 sns.set_style('whitegrid')
 sns.lineplot(x='dt', y='main_temp', data=df_daily).set(title='main temp - one entry per day')
 
-# METADATA ********************
 
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# MARKDOWN ********************
-
-# ### ADF test - Augmented Dicky-Fuller test
+#### ADF test - Augmented Dicky-Fuller test
 # 
 # a statistical test that determines if a time series is stationary or not:
 # - When the test statistic is lower than the critical value, you reject the null hypothesis and infer that the time series is stationary.
 
-# CELL ********************
 
 # ADF test - stationary 
 
@@ -143,15 +80,6 @@ if result[1] < 0.05:
 else:
     print('The time series is likely non-stationary.')
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 # Take the first difference - eliminates trend and seasonality (first difference of Y at period t = Yt-Yt-1)
 
 first_diff = df_daily.diff()[1:]
@@ -159,24 +87,13 @@ first_diff = df_daily.diff()[1:]
 sns.set_style('whitegrid')
 sns.lineplot(x='dt', y='main_temp', data=first_diff).set(title='main temp - 1st difference')
 
-# METADATA ********************
 
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# MARKDOWN ********************
-
-# ### ACF plot - Autocorrelation function 
+#### ACF plot - Autocorrelation function 
 # 
 # shows the correlation between a time series and its lagged values
 # - observation at the current time spot and the observations at previous time spots
 # - starts at lag 0 (which is itself) so therefore should always have a correlation of 1
 # - used to identify the order of an AR model
-
-# CELL ********************
-
 
 fig, axs = plt.subplots(1, 2, figsize=(20, 5))
 
@@ -190,29 +107,16 @@ axs[1].set_ylabel('Autocorrelation')
 
 plt.show()
 
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# MARKDOWN ********************
-
 # can select the order q for model - if plot has a sharp cut-off after lag
 # - nothing noticeable 
 
-# MARKDOWN ********************
 
-# ### PACF plot - Partial autocorrelation function
+#### PACF plot - Partial autocorrelation function
 # 
 # shows the correlation of a time series with itself at different lags, after removing the effects of the previous lags
 # - used to identify the order of an MA model
 # 
 
-
-# CELL ********************
 
 fig, axs = plt.subplots(1, 2, figsize=(20, 5))
 
@@ -226,23 +130,11 @@ axs[1].set_ylabel('Partial Autocorrelation')
 
 plt.show()
 
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# MARKDOWN ********************
-
 # PACF - outside the blue boundary tells us the order of the AR model (p)
 # - significant lags (2 , 3 , 9)
 # - shows seasonality 
 
-# MARKDOWN ********************
-
-# ### Seasonal Decomposition
+#### Seasonal Decomposition
 # 
 # breaks down time series data into three components: trend, seasonal, and residual
 # 
@@ -251,8 +143,6 @@ plt.show()
 # - Residual: random variation left over after the trend and seasonal components have been accounted for 
 
 
-# CELL ********************
-
 plt.close('all') 
 plt.figure(figsize=(50,10))
 result = seasonal_decompose(df_daily['main_temp'], model='additive', period=20)
@@ -260,45 +150,16 @@ result.plot()
 plt.show()
 
 
-
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 plt.close('all') 
 plt.figure(figsize=(50,10))
 result = seasonal_decompose(first_diff['main_temp'], model='additive', period=20)
 result.plot()
 plt.show()
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 # Creating series - for modelling 
 
 temp_series = df_daily['main_temp']
-
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 # Code from - https://medium.com/thedeephub/mastering-time-series-forecasting-f49f45855c83
 
@@ -344,68 +205,22 @@ recommendation = recommend_model(temp_series)
 # Print the recommendation
 print(f"Recommended Model: {recommendation}")
 
-# METADATA ********************
+#### SARIMA model - seasonal auto-regressive integrated moving average
 
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# MARKDOWN ********************
-
-# ### SARIMA model - seasonal auto-regressive integrated moving average
-
-# CELL ********************
 
 # Split dataset - train & test 
 
 size = int(len(temp_series)*0.70)
 Xtrain, Xtest = temp_series[0:size], temp_series[size:]
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 Xtrain.head()
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 Xtest.head()
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 plt.figure()
 Xtrain.plot()
 Xtest.plot()
 plt.title('Visual of train vs test set')
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 # Model Training 
 mod = sm.tsa.statespace.SARIMAX(Xtrain,
@@ -416,39 +231,12 @@ mod = sm.tsa.statespace.SARIMAX(Xtrain,
 results = mod.fit(disp=False)
 print(results.summary().tables[1])
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 final_predict = pd.DataFrame(results.predict(start=len(Xtrain), end=len(temp_series)))
 final_predict.columns = ['pred']
 final_predict.head()
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 predict_actual = pd.concat((final_predict,Xtest), axis=1)
 predict_actual.head()
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 plt.figure(figsize=(10,8))
 plt.plot(predict_actual.index, predict_actual['pred'], color = 'red', label = 'prediction')
@@ -456,34 +244,12 @@ plt.plot(temp_series.index, temp_series, color = 'blue', label = 'actual')
 plt.plot(pd.DataFrame(results.predict(start = len(temp_series), end = len(temp_series) + 36)), color = 'yellow', label = 'forecast')
 plt.legend()
 
-# METADATA ********************
 
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# MARKDOWN ********************
-
-
-# MARKDOWN ********************
-
-# # ML model - on london dataset (2021-2024)
-
-# CELL ********************
+## ML model - on london dataset (2021-2024)
 
 # Load dataset
 ldn_df = spark.table("ldn_weather_final").toPandas()
 ldn_df.set_index(pd.to_datetime(ldn_df['dt']), inplace=True)
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 # Removing multiple inputs a day 
 ldn_df_resampled = ldn_df[['temp', 'temp_feelslike', 'temp_max', 'temp_min']].resample('D').mean()
@@ -495,64 +261,15 @@ lnd_monthly = ldn_df[['temp', 'temp_feelslike', 'temp_max', 'temp_min']].resampl
 pd.options.display.float_format = '{:.2f}'.format
 
 
-
-
-
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 ldn_df_resampled.head()
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 lnd_monthly.head()
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 sns.set_style('whitegrid')
 sns.lineplot(x='dt', y='temp', data=ldn_df_resampled).set(title='temperature')
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 sns.set_style('whitegrid')
 sns.lineplot(x='dt', y='temp', data=lnd_monthly).set(title='temperature')
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 # ADF test - stationary 
 
@@ -571,14 +288,6 @@ if result[1] < 0.05:
 else:
     print('The time series is likely non-stationary.')
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 # ADF test - stationary 
 
@@ -597,18 +306,8 @@ if result[1] < 0.05:
 else:
     print('The time series is likely non-stationary.')
 
-# METADATA ********************
 
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# MARKDOWN ********************
-
-# ##### - not stationary = need to take first difference
-
-# CELL ********************
+###### - not stationary = need to take first difference
 
 fig, axs = plt.subplots(1, 2, figsize=(20, 5))
 
@@ -622,32 +321,11 @@ axs[1].set_ylabel('PCF')
 
 plt.show()
 
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# MARKDOWN ********************
-
 # significant: 1 , 3, (5)
-
-# CELL ********************
 
 ## difference (by one)
 lnd_monthly['temp_diff'] = lnd_monthly['temp'].diff()
 lnd_monthly['temp_diff'].fillna(lnd_monthly['temp_diff'].mean(), inplace=True)
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 fig, axs = plt.subplots(1, 2, figsize=(20, 5))
 
@@ -661,79 +339,23 @@ axs[1].set_ylabel('PCF')
 
 plt.show()
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 plt.close('all') 
 plt.figure(figsize=(50,10))
 result = seasonal_decompose(lnd_monthly['temp_diff'], model='additive', period=12)
 result.plot()
 plt.show()
 
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 ldn_df_resampled = ldn_df_resampled.reset_index()
 print(ldn_df_resampled)
-
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 ldn_df_resampled_2 = ldn_df_resampled.sample(n=1000, random_state=None)
 print(ldn_df_resampled_2)
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 ldn_df_resampled_2 = ldn_df_resampled_2.sort_index()
 print(ldn_df_resampled_2)
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 ldn_df_resampled_2 = ldn_df_resampled_2.set_index("dt")
 print(ldn_df_resampled_2)
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 # Creating series - for modelling 
 
@@ -744,64 +366,19 @@ ldn_series_2 = ldn_df_resampled_2['temp']
 #lnd_monthly_series = lnd_monthly['temp_diff']
 
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 # Split dataset - train & test 
 
 size = int(len(ldn_series_2)*0.70)
 Xldntrain, Xldntest = ldn_series_2[0:size], ldn_series_2[size:]
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 Xldntrain.head()
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 Xldntest.head()
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 plt.figure()
 Xldntrain.plot()
 Xldntest.plot()
 plt.title('Visual of train vs test set')
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 # Model Training 
 mod = sm.tsa.statespace.SARIMAX(Xldntrain,
@@ -812,52 +389,15 @@ mod = sm.tsa.statespace.SARIMAX(Xldntrain,
 ldn_results = mod.fit(disp=False)
 print(ldn_results.summary().tables[1])
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 ldn_final_predict = pd.DataFrame(ldn_results.predict(start=len(Xldntrain), end=len(ldn_series_2)))
 ldn_final_predict.colu#mns = ['prediction']
 ldn_final_predict.head()
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 predict_actual_ldn = pd.concat((ldn_final_predict,Xldntest), axis=1).reset_index()
 predict_actual_ldn.rename(columns={"index": "dt"}, inplace=True)
 predict_actual_ldn.head()
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 last_temp_value = lnd_monthly['temp'].iloc[size - 1]  # The last known temperature before the test set
-
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 # undifference results : 
 
@@ -874,29 +414,10 @@ for i, pred in enumerate(predict_actual_ldn['prediction']):
 # add the undifferenced predictions to the dataFrame
 predict_actual_ldn['undiff_prediction'] = undiff_predictions
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 predict_actual_ldn.head()
 
-# METADATA ********************
 
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# MARKDOWN ********************
-
-# ##### - saving model (order=(1, 0, 1), seasonal_order=(0, 1, 1, 12)) - predictions and actuals as its own table (for reporting)
-
-# CELL ********************
+###### - saving model (order=(1, 0, 1), seasonal_order=(0, 1, 1, 12)) - predictions and actuals as its own table (for reporting)
 
 model_1 = spark.createDataFrame(predict_actual_ldn)
 
@@ -907,25 +428,7 @@ model_1 = model_1.withColumn("undiff_prediction", col("undiff_prediction").cast(
 
 #model_1.write.format("delta").mode("overwrite").saveAsTable("ldn_model_1_results")
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 model_1.write.format("delta").mode("overwrite").option("overwriteSchema", "true").saveAsTable("ldn_model_1_results")
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 plt.plot(predict_actual_ldn['dt'], predict_actual_ldn['undiff_prediction'], color='red', label='Undifferenced Prediction')
 plt.plot(lnd_monthly.index[size:], lnd_monthly['temp'][size:], color='blue', label='Actual Temperature')
@@ -936,29 +439,12 @@ plt.title('Actual vs Predicted Temperatures (Undifferenced)')
 plt.legend()
 plt.show()
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 plt.figure(figsize=(10,8))
 plt.plot(predict_actual_ldn.index, predict_actual_ldn['pred'], color = 'red', label = 'prediction')
 plt.plot(lnd_monthly_series.index, lnd_monthly_series, color = 'blue', label = 'actual')
 plt.plot(pd.DataFrame(ldn_results.predict(start = len(lnd_monthly_series), end = len(lnd_monthly_series) + 36)), color = 'yellow', label = 'forecast')
 plt.legend()
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 # Creating loop to store results in table 
 
@@ -1008,14 +494,6 @@ spark_df.write.format("delta") \
     .mode("overwrite") \
     .saveAsTable("LDN_weather_results")
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 ### full model (for easy comparison): - change all the way through the code !!
 
@@ -1073,10 +551,3 @@ plt.plot(ldn_series_2.index[size:], ldn_series_2[size:], color = 'blue', label =
 plt.plot(pd.DataFrame(ldn_results.predict(start = len(ldn_series_2), end = len(ldn_series_2) + 36)), color = 'yellow', label = 'forecast')
 plt.legend()
 
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
