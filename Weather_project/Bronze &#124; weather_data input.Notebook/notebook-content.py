@@ -1,38 +1,11 @@
 # Fabric notebook source
 
-# METADATA ********************
-
-# META {
-# META   "kernel_info": {
-# META     "name": "synapse_pyspark"
-# META   },
-# META   "dependencies": {
-# META     "lakehouse": {
-# META       "default_lakehouse": "a40bc079-4900-4630-97c0-902c8c1e2328",
-# META       "default_lakehouse_name": "Weather_lakehouse",
-# META       "default_lakehouse_workspace_id": "346e1b64-7681-4e36-aaf6-454ec69177f7"
-# META     }
-# META   }
-# META }
-
-# CELL ********************
-
 import requests
 import json
 import base64
 from datetime import datetime
 import os
 import time
-
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 # cities and corresponding lat / long
 cities = {
@@ -60,52 +33,17 @@ cities = {
 
 }
 
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 # find latest folder
 
-# METADATA ********************
 
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
+api_key = '################################'
 
-# CELL ********************
-
-api_key = '952ee51c678ec68cca8388c6fa23e4d2'
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 # Function to get weather data for a given city
 def get_weather_data(lat, lon):
     url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={api_key}&units=metric"
     response = requests.get(url)
     return response
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 # Loop through all cities and fetch weather data
 for city, coordinates in cities.items():
@@ -148,9 +86,3 @@ for city, coordinates in cities.items():
     except Exception as e:
         print(f"An error occurred for {city}: {e}")
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
