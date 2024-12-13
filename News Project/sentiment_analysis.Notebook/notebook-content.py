@@ -1,51 +1,14 @@
 # Fabric notebook source
 
-# METADATA ********************
-
-# META {
-# META   "kernel_info": {
-# META     "name": "synapse_pyspark"
-# META   },
-# META   "dependencies": {
-# META     "lakehouse": {
-# META       "default_lakehouse": "35d8986a-4ef2-4e13-a372-d192070159ea",
-# META       "default_lakehouse_name": "news_lake_db",
-# META       "default_lakehouse_workspace_id": "346e1b64-7681-4e36-aaf6-454ec69177f7"
-# META     }
-# META   }
-# META }
-
-# MARKDOWN ********************
-
-# ## Performing sentiment analysis on news headlines 
+### Performing sentiment analysis on news headlines 
 # - seeing whether a news story is positive, negative or neutral 
 # - using machine learning workflows - through synapse machine learning
-
-# CELL ********************
 
 df = spark.sql("SELECT * FROM news_lake_db.news_load")
 display(df)
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 import synapse.ml.core
 from synapse.ml.services import AnalyzeText
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 # configure model
 model = (AnalyzeText()
@@ -55,29 +18,11 @@ model = (AnalyzeText()
         .setErrorCol('error')
         )
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 # apply model to dataframe
 
 result = model.transform(df)
 
 display(result)
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 from pyspark.sql.functions import col
 
@@ -86,39 +31,11 @@ from pyspark.sql.functions import col
 sentiment_df = result.withColumn('sentiment', col('response.documents.sentiment'))
 display(sentiment_df)
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 # remove error and response col
 
 sentiment_df_final = sentiment_df.drop('error', 'response')
 
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 display(sentiment_df_final)
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 from pyspark.sql.utils import AnalysisException
 
@@ -153,10 +70,3 @@ except AnalysisException:
                     WHEN NOT MATCHED THEN INSERT *
 
                 """)
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
