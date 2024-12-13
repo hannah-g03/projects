@@ -1,26 +1,5 @@
 # Fabric notebook source
 
-# METADATA ********************
-
-# META {
-# META   "kernel_info": {
-# META     "name": "synapse_pyspark"
-# META   },
-# META   "dependencies": {
-# META     "lakehouse": {
-# META       "default_lakehouse": "a40bc079-4900-4630-97c0-902c8c1e2328",
-# META       "default_lakehouse_name": "Weather_lakehouse",
-# META       "default_lakehouse_workspace_id": "346e1b64-7681-4e36-aaf6-454ec69177f7"
-# META     }
-# META   }
-# META }
-
-# MARKDOWN ********************
-
-# Historical data input - for all 20 cities for the past 4 years 
-
-# CELL ********************
-
 import requests
 import json
 import base64
@@ -28,39 +7,12 @@ from datetime import datetime, timedelta
 import os
 import time
 
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 %run Bronze | Functions
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 # API CALL : https://history.openweathermap.org/data/2.5/history/city?lat={lat}&lon={lon}&type=hour&start={start}&end={end}&appid={API key}
 
 API_KEY = '952ee51c678ec68cca8388c6fa23e4d2'
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 # cities and corresponding lat / long
 cities = {
@@ -87,15 +39,6 @@ cities = {
 'derby' : {'lat' : '52.9225','lon' : '1.4746'}
 
 }
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 # Dictionary for start and end dates
 
@@ -128,15 +71,6 @@ print("Start Dictionary:")
 print(start_dict)
 print("\nEnd Dictionary:")
 print(end_dict)
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 # Main loop to fetch data for each city and each week
 for city, coordinates in cities.items():
@@ -183,14 +117,6 @@ for city, coordinates in cities.items():
         except Exception as e:
             print(f"An error occurred for {city} ({week}): {e}")
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# MARKDOWN ********************
 
 # all cities exported apart from:
 # - York
