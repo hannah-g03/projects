@@ -1,22 +1,5 @@
 # Fabric notebook source
 
-# METADATA ********************
-
-# META {
-# META   "kernel_info": {
-# META     "name": "synapse_pyspark"
-# META   },
-# META   "dependencies": {
-# META     "lakehouse": {
-# META       "default_lakehouse": "a40bc079-4900-4630-97c0-902c8c1e2328",
-# META       "default_lakehouse_name": "Weather_lakehouse",
-# META       "default_lakehouse_workspace_id": "346e1b64-7681-4e36-aaf6-454ec69177f7"
-# META     }
-# META   }
-# META }
-
-# CELL ********************
-
 import os
 import json
 from pyspark.sql import SparkSession
@@ -27,25 +10,7 @@ from pyspark.sql.types import *
 from pyspark.sql.functions import udf
 from pyspark.sql.types import FloatType, StructType, StructField
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 %run Bronze | Functions
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 cities = {
 'london' : {'lat' : 51.5074,'lon' : 0.1278},
@@ -70,26 +35,8 @@ cities = {
 'derby' : {'lat' : 52.9225,'lon' : 1.4746}
 }
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 # Path for data 
 data_path = "/lakehouse/default/Files/historical_weather_data"
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 # Load the data 
 data = load_and_clean_data(data_path)
@@ -100,41 +47,14 @@ df = spark.read.json(spark.sparkContext.parallelize(data))
 # Normalise DataFrame
 normalized_df = normalize_historical_data(df)
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 # Flatten weather arrays
 normalized_df = normalized_df.withColumn("weather_id", explode("weather_id")) \
     .withColumn("weather_main", explode("weather_main")) \
     .withColumn("weather_description", explode("weather_description")) \
     .withColumn("weather_icon", explode("weather_icon"))
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 normalized_df.printSchema()
 normalized_df.show()
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 # Add coordinates
 
@@ -186,16 +106,6 @@ normalized_df = normalized_df.withColumn('coord_lon',
     otherwise(lit(-1))
 )
 
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 # Select and cast columns to match the current schema
 normalized_df = normalized_df.select(
     col("city_id").cast("long").alias("city_id"),
@@ -218,30 +128,9 @@ normalized_df = normalized_df.select(
     col('city').cast('string')
 )
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 normalized_df.printSchema()
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# MARKDOWN ********************
-
 # city_id coming up as -1 , need to fix ^^^
-
-
-# CELL ********************
 
 # Add ID column
 df_with_id = normalized_df.withColumn("city_id",
@@ -268,26 +157,7 @@ df_with_id = normalized_df.withColumn("city_id",
     otherwise(lit(-1))  
 )
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 df_with_id.printSchema()
-
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 # Create dim - dim_weather
 # Create unique df based on weather_id (drop duplicates)
@@ -304,26 +174,7 @@ delta_table.alias("tgt").merge(
     "tgt.weather_id = src.weather_id AND tgt.weather_main = src.weather_main AND tgt.weather_description = src.weather_description"
 ).whenNotMatchedInsertAll().execute()
 
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 df_with_id.printSchema()
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 df_unique_temp = df_with_id.toPandas().sort_values('dt').groupby('city').apply(lambda x: x.drop_duplicates(subset='dt', keep='first')).reset_index(drop=True)
 
@@ -334,25 +185,7 @@ fact_temp = spark.createDataFrame(fact_temp)
 # Save as a Delta table
 fact_temp.write.format("delta").mode("overwrite").saveAsTable("fact_temp")
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 fact_temp.display()
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 # Create fact table - fact_temp
 
@@ -368,17 +201,6 @@ delta_table_temp.alias("tgt").merge(
     fact_temp.alias("src"),
     "tgt.dt = src.dt AND tgt.city_id = src.city_id"
 ).whenNotMatchedInsertAll().execute()
-
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 
 
 ##################################################
@@ -415,9 +237,3 @@ delta_table.alias("tgt").merge(
 df_with_id.write.format("delta").option("mergeSchema", "true") \
     .mode("append").saveAsTable("current_weather_data")
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
