@@ -1,25 +1,6 @@
 # Fabric notebook source
 
-# METADATA ********************
-
-# META {
-# META   "kernel_info": {
-# META     "name": "synapse_pyspark"
-# META   },
-# META   "dependencies": {
-# META     "lakehouse": {
-# META       "default_lakehouse": "35d8986a-4ef2-4e13-a372-d192070159ea",
-# META       "default_lakehouse_name": "news_lake_db",
-# META       "default_lakehouse_workspace_id": "346e1b64-7681-4e36-aaf6-454ec69177f7"
-# META     }
-# META   }
-# META }
-
-# MARKDOWN ********************
-
-# ### Notebook - loading latest tech news from api 
-
-# CELL ********************
+#### Notebook - loading latest tech news from api 
 
 import requests
 import json
@@ -45,15 +26,6 @@ def fetch_news_data():
     else:
         print(f"Error: {response.status_code}")
         return None
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
 
 # function to clean the json data 
 
@@ -98,15 +70,6 @@ if news_json:
     cleaned_df = clean_news_data(news_json)
     print(cleaned_df)
 
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
-
-# CELL ********************
-
 # save as delta table
 
 from pyspark.sql.utils import AnalysisException
@@ -146,10 +109,3 @@ except AnalysisException:
                     WHEN NOT MATCHED THEN INSERT *
 
                 """)
-
-# METADATA ********************
-
-# META {
-# META   "language": "python",
-# META   "language_group": "synapse_pyspark"
-# META }
