@@ -11,7 +11,7 @@ import time
 
 # API CALL : https://history.openweathermap.org/data/2.5/history/city?lat={lat}&lon={lon}&type=hour&start={start}&end={end}&appid={API key}
 
-API_KEY = '952ee51c678ec68cca8388c6fa23e4d2'
+API_KEY = '################################'
 
 
 # cities and corresponding lat / long
